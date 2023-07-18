@@ -28,10 +28,12 @@ public abstract class SerialPortReceivedThread extends Thread {
     private static final String TAG = SerialPortReceivedThread.class.getSimpleName();
 
     private InputStream mInputStream;
+    private boolean isZone;
     private byte[] mReceivedBuffer;
 
-    public SerialPortReceivedThread(InputStream inputStream) {
+    public SerialPortReceivedThread(InputStream inputStream, boolean isZone) {
         mInputStream = inputStream;
+        this.isZone = isZone;
         mReceivedBuffer = new byte[1024];
     }
 
@@ -43,6 +45,13 @@ public abstract class SerialPortReceivedThread extends Thread {
                 if (null == mInputStream) {
                     return;
                 }
+                if (isZone) {
+                    if (mInputStream.available() > 0 == false) {
+                        continue;
+                    } else {
+                        Thread.sleep(500);
+                    }
+                }
                 int size = mInputStream.read(mReceivedBuffer);
                 if (0 >= size) {
                     return;
@@ -52,6 +61,8 @@ public abstract class SerialPortReceivedThread extends Thread {
                 onDataReceived(receivedBytes);
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }

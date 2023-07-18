@@ -19,18 +19,21 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
+
 import me.f1reking.serialportlib.entity.BAUDRATE;
 import me.f1reking.serialportlib.entity.DATAB;
 import me.f1reking.serialportlib.entity.Device;
 import me.f1reking.serialportlib.entity.FLOWCON;
 import me.f1reking.serialportlib.entity.PARITY;
 import me.f1reking.serialportlib.entity.STOPB;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+
 import me.f1reking.serialportlib.listener.IOpenSerialPortListener;
 import me.f1reking.serialportlib.listener.ISerialPortDataListener;
 import me.f1reking.serialportlib.listener.Status;
@@ -68,6 +71,7 @@ public class SerialPortHelper {
     private static int mFlowCon = 0; //流控默认值
     private static int mFlags = 0;
     private boolean isOpen = false; //是否打开串口标志
+    private boolean isZone = false; //是否是分片数据
 
     /**
      * 获得所有串口设备的地址
@@ -111,10 +115,19 @@ public class SerialPortHelper {
 
     /**
      * 串口状态
+     *
      * @return true:打开 false:关闭
      */
     public boolean isOpen() {
         return isOpen;
+    }
+
+    public boolean setZone(boolean zone) {
+        if (isOpen) {
+            return false;
+        }
+        isZone = zone;
+        return true;
     }
 
     public boolean setPort(String port) {
@@ -275,7 +288,6 @@ public class SerialPortHelper {
     }
 
 
-
     /**
      * 设置串口打开的监听
      *
@@ -297,13 +309,13 @@ public class SerialPortHelper {
     /**
      * 打开串口
      *
-     * @param device 串口设备的绝对路径
+     * @param device   串口设备的绝对路径
      * @param baudRate {@link BAUDRATE} 波特率
      * @param stopBits {@link STOPB} 停止位
      * @param dataBits {@link DATAB} 数据位
-     * @param parity {@link PARITY} 校验位
-     * @param flowCon {@link FLOWCON} 流控
-     * @param flags O_RDWR  读写方式打开 | O_NOCTTY  不允许进程管理串口 | O_NDELAY   非阻塞
+     * @param parity   {@link PARITY} 校验位
+     * @param flowCon  {@link FLOWCON} 流控
+     * @param flags    O_RDWR  读写方式打开 | O_NOCTTY  不允许进程管理串口 | O_NDELAY   非阻塞
      * @return 打开状态
      */
     private boolean openSerialPort(File device, int baudRate, int stopBits, int dataBits, int parity, int flowCon, int flags) {
@@ -362,7 +374,7 @@ public class SerialPortHelper {
      * 开启接收消息的线程
      */
     private void startReceivedThread() {
-        mSerialPortReceivedThread = new SerialPortReceivedThread(mFileInputStream) {
+        mSerialPortReceivedThread = new SerialPortReceivedThread(mFileInputStream, isZone) {
             @Override
             public void onDataReceived(byte[] bytes) {
                 if (null != mISerialPortDataListener) {
@@ -465,14 +477,13 @@ public class SerialPortHelper {
     /**
      * 打开串口
      *
-     * @param path 串口设备的绝对路径
+     * @param path     串口设备的绝对路径
      * @param baudRate {@link BAUDRATE} 波特率
      * @param stopBits {@link STOPB} 停止位
      * @param dataBits {@link DATAB} 数据位
-     * @param parity {@link PARITY} 校验位
-     * @param flowCon {@link FLOWCON} 流控
-     * @param flags O_RDWR  读写方式打开 | O_NOCTTY  不允许进程管理串口 | O_NDELAY   非阻塞
-     *
+     * @param parity   {@link PARITY} 校验位
+     * @param flowCon  {@link FLOWCON} 流控
+     * @param flags    O_RDWR  读写方式打开 | O_NOCTTY  不允许进程管理串口 | O_NDELAY   非阻塞
      */
     private static native FileDescriptor nativeOpen(String path, int baudRate, int stopBits, int dataBits, int parity, int flowCon, int flags);
 
