@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+group = 'com.github.JamesGZM'
+version = '1.0.0'
 
 android {
     compileSdkVersion 29
@@ -31,4 +35,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
 }
-apply from: '../jitpack.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.JamesGZM'
+                artifactId = 'Android-SerialPort'
+                version = '1.0.0'
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
