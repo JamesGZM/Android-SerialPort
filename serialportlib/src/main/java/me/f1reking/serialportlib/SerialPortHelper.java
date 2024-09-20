@@ -63,15 +63,28 @@ public class SerialPortHelper {
     private FileInputStream mFileInputStream;
     private FileOutputStream mFileOutputStream;
 
-    private static String mPort = "/dev/ttyUSB0"; //串口设置默认值
-    private static int mBaudRate = 115200; //波特率默认值
-    private static int mStopBits = 2; //停止位默认值
-    private static int mDataBits = 8; //数据位默认值
-    private static int mParity = 0; //校验位默认值
-    private static int mFlowCon = 0; //流控默认值
-    private static int mFlags = 0;
+    private String mPort = "/dev/ttyUSB0"; //串口设置默认值
+    private int mBaudRate = 115200; //波特率默认值
+    private int mStopBits = 2; //停止位默认值
+    private int mDataBits = 8; //数据位默认值
+    private int mParity = 0; //校验位默认值
+    private int mFlowCon = 0; //流控默认值
+    private int mFlags = 0;
     private boolean isOpen = false; //是否打开串口标志
     private boolean isZone = false; //是否是分片数据
+
+    public SerialPortHelper() {
+    }
+
+    public SerialPortHelper(String mPort, int mBaudRate, int mStopBits, int mDataBits, int mParity, int mFlowCon, int mFlags) {
+        this.mPort = mPort;
+        this.mBaudRate = mBaudRate;
+        this.mStopBits = mStopBits;
+        this.mDataBits = mDataBits;
+        this.mParity = mParity;
+        this.mFlowCon = mFlowCon;
+        this.mFlags = mFlags;
+    }
 
     /**
      * 获得所有串口设备的地址
@@ -215,6 +228,13 @@ public class SerialPortHelper {
     }
 
     public static class Builder {
+        private final String mPort; //串口设置默认值
+        private final int mBaudRate; //波特率默认值
+        private int mStopBits = 2; //停止位默认值
+        private int mDataBits = 8; //数据位默认值
+        private int mParity = 0; //校验位默认值
+        private int mFlowCon = 0; //流控默认值
+        private int mFlags = 0;
 
         public Builder(String port, int baudRate) {
             mPort = port;
@@ -247,7 +267,7 @@ public class SerialPortHelper {
         }
 
         public SerialPortHelper build() {
-            return new SerialPortHelper();
+            return new SerialPortHelper(mPort, mBaudRate, mStopBits, mDataBits, mParity, mFlowCon, mFlags);
         }
 
     }
